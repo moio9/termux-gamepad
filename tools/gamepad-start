@@ -1,0 +1,43 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+
+termux_prefix="${PREFIX:-/data/data/com.termux/files/usr}"
+bridge="$termux_prefix/bin/termux-gamepad-evdev-bridge"
+socket="${TERMUX_GAMEPAD_EVDEV_SOCKET:-$termux_prefix/tmp/termux-gamepad-evdev.sock}"
+export DISPLAY="${DISPLAY:-:0}"
+export TERMUX_GAMEPAD_EVDEV_SOCKET="$socket"
+
+if [ -S "$socket" ] && pgrep -f "$bridge" >/dev/null 2>&1; then
+    printf 'Gamepad bridge is already running (%s).\n' "$socket"
+    exit 0
+fi
+if pgrep -f "$bridge" >/dev/null 2>&1; then
+    printf 'A gamepad bridge is running with another or unavailable socket.\n' >&2
+    exit 1
+fi
+if [ ! -x "$bridge" ]; then
+    printf 'Missing bridge: %s\n' "$bridge" >&2
+    exit 1
+fi
+
+case "$socket" in
+    "$termux_prefix"/tmp/termux-gamepad-*.sock)
+        rm -f -- "$socket"
+        ;;
+esac
+
+nohup "$bridge" "$socket" \
+    >"$termux_prefix/tmp/termux-gamepad-bridge.log" 2>&1 </dev/null &
+
+bridge_wait=0
+while [ "$bridge_wait" -lt 40 ] && [ ! -S "$socket" ]; do
+    sleep 0.05
+    bridge_wait=$((bridge_wait + 1))
+done
+if [ ! -S "$socket" ]; then
+    printf 'Bridge did not start; see %s\n' \
+        "$termux_prefix/tmp/termux-gamepad-bridge.log" >&2
+    exit 1
+fi
+
+printf 'Gamepad bridge started (%s).\n' "$socket"

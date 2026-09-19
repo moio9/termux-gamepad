@@ -1,0 +1,129 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+
+termux_prefix="${PREFIX:-/data/data/com.termux/files/usr}"
+sdl_dir="${TERMUX_GAMEPAD_SDL_DIR:-$termux_prefix/lib/termux-gamepad-sdl2}"
+shim_dir="${TERMUX_GAMEPAD_SHIM_DIR:-$termux_prefix/lib/termux-input}"
+socket="${TERMUX_GAMEPAD_EVDEV_SOCKET:-$termux_prefix/tmp/termux-gamepad-evdev.sock}"
+bridge="$termux_prefix/bin/termux-gamepad-evdev-bridge"
+mode=evdev
+
+usage()
+{
+    cat <<'EOF'
+Usage: gamepad-run [--sdl|--evdev] [--dinput-alias] program [arguments...]
+
+  --sdl            Force the isolated custom SDL fallback without LD_PRELOAD
+  --evdev          Use fake udev/evdev (default)
+  --dinput-alias   SDL mode: expose the optional DirectInput FF alias too
+  --no-alias       SDL mode: expose only the selected Termux:X11 controller
+  -h, --help       Show this help
+
+Examples:
+  gamepad-run firefox --no-remote
+  gamepad-run godot --rendering-driver vulkan
+  gamepad-run wine-staging game.exe
+  gamepad-run --sdl ./secure-sdl-game
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --sdl)
+            mode=sdl
+            shift
+            ;;
+        --evdev)
+            mode=evdev
+            shift
+            ;;
+        --dinput-alias)
+            export SDL_TERMUXX11_DINPUT_ALIAS=1
+            shift
+            ;;
+        --no-alias)
+            export SDL_TERMUXX11_DINPUT_ALIAS=0
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+if [ "$#" -eq 0 ]; then
+    usage >&2
+    exit 2
+fi
+
+export DISPLAY="${DISPLAY:-:0}"
+export TERMUX_GAMEPAD_EVDEV_SOCKET="$socket"
+
+ensure_bridge()
+{
+    if [ -S "$socket" ] && pgrep -f "$bridge" >/dev/null 2>&1; then
+        return
+    fi
+    if pgrep -f "$bridge" >/dev/null 2>&1; then
+        echo "gamepad-run: bridge is running, but $socket is unavailable" >&2
+        return 1
+    fi
+    if [ ! -x "$bridge" ]; then
+        echo "gamepad-run: missing $bridge" >&2
+        return 1
+    fi
+    case "$socket" in
+        "$termux_prefix"/tmp/termux-gamepad-*.sock)
+            rm -f -- "$socket"
+            ;;
+    esac
+    nohup "$bridge" "$socket" \
+        >"$termux_prefix/tmp/termux-gamepad-bridge.log" 2>&1 </dev/null &
+    bridge_wait=0
+    while [ "$bridge_wait" -lt 40 ] && [ ! -S "$socket" ]; do
+        sleep 0.05
+        bridge_wait=$((bridge_wait + 1))
+    done
+    if [ ! -S "$socket" ]; then
+        echo "gamepad-run: bridge did not start; see $termux_prefix/tmp/termux-gamepad-bridge.log" >&2
+        return 1
+    fi
+}
+
+ensure_bridge
+
+if [ "$mode" = sdl ]; then
+    if [ ! -f "$sdl_dir/libSDL2-2.0.so.0" ]; then
+        echo "gamepad-run: custom SDL is not installed in $sdl_dir" >&2
+        exit 1
+    fi
+    case "${LD_PRELOAD:-}" in
+        *libtermux-evdev*|*termux-input/libudev*)
+            unset LD_PRELOAD
+            ;;
+    esac
+    unset SDL_JOYSTICK_DEVICE
+    export SDL_TERMUXX11_GAMEPAD=1
+    export SDL_JOYSTICK_HIDAPI=0
+    export LD_LIBRARY_PATH="$sdl_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+else
+    if [ ! -f "$shim_dir/libtermux-evdev.so" ] ||
+       [ ! -f "$shim_dir/libudev.so.1" ]; then
+        echo "gamepad-run: evdev shims are not installed in $shim_dir" >&2
+        exit 1
+    fi
+    export SDL_JOYSTICK_HIDAPI=0
+    export SDL_JOYSTICK_DEVICE=/dev/input/event99
+    export LD_LIBRARY_PATH="$shim_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    export LD_PRELOAD="$shim_dir/libtermux-evdev.so:$shim_dir/libudev.so.1${LD_PRELOAD:+:$LD_PRELOAD}"
+fi
+
+exec "$@"

@@ -1,0 +1,5 @@
+#!/data/data/com.termux/files/usr/bin/sh
+set -eu
+termux_prefix="${PREFIX:-/data/data/com.termux/files/usr}"
+exec "$termux_prefix/bin/gamepad-run" \
+    "$termux_prefix/lib/termux-gamepad-sdl2/testtermuxx11gamepad" "$@"

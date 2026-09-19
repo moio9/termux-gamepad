@@ -35,10 +35,11 @@ bridge and diagnostic programs. It is an experimental source preview.
 It requires a matching modified Termux:X11 server implementing the
 `LORIE-CONTROLLER` extension; stock Termux:X11 is not sufficient.
 The companion project is https://github.com/moio9/termux-x11-extra.
-A matched APK/companion/SDL2 binary release is being prepared separately.
+The modified APK and Termux:X11 companion are distributed separately; install
+a compatible pair before testing input.
 
-The SDL2 fork and its combined Debian package are separate components; they
-are not built or installed by this repository. The standalone installer here
+The SDL2 fork is a separate component. Packaging scripts here can create
+its Debian package from an existing SDL2 build. The standalone installer here
 keeps the udev/evdev shims scoped to explicitly launched applications and does
 not modify shell startup files.
 
@@ -234,3 +235,57 @@ top of it.
 
 No project license has been selected for this initial source preview.
 Publication alone does not grant an open-source license.
+
+## Split Debian packages
+
+The preview release provides two packages for native Termux AArch64:
+
+- `termux-gamepad_0.1.0_aarch64.deb`: client API, udev/evdev shims, bridge,
+  `gamepad-start`, `gamepad-run`, `gamepad-api-test` and shell profile.
+- `sdl2_2.32.10+termuxgamepad4_aarch64.deb`: modified SDL2 and its
+  `gamepad-test` / `gamepad-haptic-test` commands. Depends on `termux-gamepad`.
+
+After downloading both files, install them together from their directory:
+
+```sh
+apt install ./termux-gamepad_0.1.0_aarch64.deb ./sdl2_2.32.10+termuxgamepad4_aarch64.deb
+```
+
+This also migrates files previously owned by the combined `termuxgamepad1`,
+`termuxgamepad2` and `termuxgamepad3` SDL2 packages. If SDL2 is held, explicitly
+unhold it before upgrading and restore the hold afterward:
+
+```sh
+apt-mark unhold sdl2
+# Run the apt install command above.
+apt-mark hold sdl2
+```
+
+Unlike the standalone source installer, the Debian package installs a shell
+profile that enables the compatibility shims in new login shells and starts
+the bridge when the X11 display is available. It preserves Termux exec's
+preload. `TERMUX_GAMEPAD_AUTOSTART=0` disables bridge autostart, not the shim
+exports. No bridge is started by package installation itself.
+
+There is no APT repository yet. `pkg up` does not download updates from GitHub
+Releases. Keeping the custom SDL2 held prevents replacement by official SDL2,
+but also prevents automatic updates of that package.
+
+Build the runtime package after `./build.sh` and `./verify.sh`:
+
+```sh
+python3 packaging/build-debs.py
+```
+
+To additionally package the companion SDL2, supply its source, configured
+build directory and the original **unmodified** Termux SDL2 2.32.10 package:
+
+```sh
+python3 packaging/build-debs.py \
+  --sdl-source ../sdl2-termux-x11-gamepad \
+  --sdl-build ../sdl2-termux-x11-gamepad/build-termux-xi2-release \
+  --sdl-base-deb ../sdl2-lorie-package/original/sdl2_2.32.10_aarch64.deb
+```
+
+Outputs and SHA-256 checksums are written to `output/`. This command packages
+existing builds; it does not rebuild SDL2 or change installed packages.

@@ -1,0 +1,12 @@
+Package: termux-gamepad
+Architecture: aarch64
+Version: 0.1.0
+Maintainer: moio9
+Homepage: https://github.com/moio9/termux-gamepad
+Depends: libx11, libxi, procps, coreutils, termux-exec
+Breaks: sdl2 (= 2.32.10+termuxgamepad1), sdl2 (= 2.32.10+termuxgamepad2), sdl2 (= 2.32.10+termuxgamepad3)
+Replaces: sdl2 (<< 2.32.10+termuxgamepad4)
+Description: Experimental Termux:X11 controller bridge and native libraries
+ Provides libtermux-gamepad, scoped udev/evdev compatibility libraries,
+ the XI2 bridge, launch tools and a shell profile for controller support.
+ Requires a matching Termux:X11 build with LORIE-CONTROLLER support.

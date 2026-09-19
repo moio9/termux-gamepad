@@ -1,0 +1,15 @@
+Package: sdl2
+Architecture: aarch64
+Version: 2.32.10+termuxgamepad4
+Maintainer: moio9 (based on the Termux sdl2 package)
+Homepage: https://www.libsdl.org
+Depends: termux-gamepad (>= 0.1.0), libdecor, libiconv, libwayland, libx11, libxcursor, libxext, libxfixes, libxi, libxkbcommon, libxrandr, libxss, pulseaudio
+Conflicts: libsdl2
+Recommends: opengl
+Replaces: libsdl2
+Description: SDL2 for Termux with native Termux:X11 gamepad support
+ This build provides fake udev/evdev as the default controller route and links
+ SDL to libtermux-gamepad as a fallback when LD_PRELOAD is rejected. It
+ supports runtime XInput and DirectInput identities, hotplug, rumble, trigger
+ rumble and SDL haptic effects, with automatic duplicate suppression while
+ preserving Termux exec path translation for graphical launchers.
