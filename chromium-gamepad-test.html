@@ -1,0 +1,44 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Termux Gamepad Test</title>
+<style>
+  body { font: 20px system-ui; margin: 2rem; background: #17191f; color: #eef; }
+  button { font: inherit; padding: .7rem 1rem; }
+  pre { white-space: pre-wrap; background: #090b10; padding: 1rem; border-radius: 8px; }
+</style>
+<h1>Termux Gamepad Test</h1>
+<p>Apasă orice buton pe controller.</p>
+<button id="rumble">Test rumble</button>
+<pre id="status">Aștept controllerul…</pre>
+<script>
+const status = document.querySelector('#status');
+let active;
+function render() {
+  const pads = [...(navigator.getGamepads?.() || [])].filter(Boolean);
+  active = pads[0];
+  if (!active) {
+    status.textContent = 'Aștept controllerul…';
+  } else {
+    const pressed = active.buttons.map((b, i) => b.pressed ? i : -1)
+                                  .filter(i => i >= 0);
+    status.textContent = [
+      `id: ${active.id}`,
+      `mapping: ${active.mapping || '(none)'}`,
+      `connected: ${active.connected}`,
+      `buttons: ${active.buttons.length}; pressed: ${pressed.join(', ') || '-'}`,
+      `axes: ${active.axes.map(v => v.toFixed(3)).join(', ')}`,
+      `vibrationActuator: ${active.vibrationActuator ? 'yes' : 'no'}`,
+    ].join('\n');
+  }
+  requestAnimationFrame(render);
+}
+document.querySelector('#rumble').onclick = async () => {
+  if (!active?.vibrationActuator) return alert('Nu există vibrationActuator');
+  const result = await active.vibrationActuator.playEffect('dual-rumble', {
+    duration: 600, strongMagnitude: 1, weakMagnitude: .5,
+  });
+  alert(`rumble: ${result}`);
+};
+addEventListener('gamepadconnected', render);
+render();
+</script>
