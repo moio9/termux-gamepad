@@ -267,9 +267,9 @@ the bridge when the X11 display is available. It preserves Termux exec's
 preload. `TERMUX_GAMEPAD_AUTOSTART=0` disables bridge autostart, not the shim
 exports. No bridge is started by package installation itself.
 
-There is no APT repository yet. `pkg up` does not download updates from GitHub
-Releases. Keeping the custom SDL2 held prevents replacement by official SDL2,
-but also prevents automatic updates of that package.
+For manual GitHub Release downloads, holding SDL2 prevents replacement by
+the official package. For automatic updates, use the signed APT repository
+below and remove that hold.
 
 Build the runtime package after `./build.sh` and `./verify.sh`:
 
@@ -289,3 +289,58 @@ python3 packaging/build-debs.py \
 
 Outputs and SHA-256 checksums are written to `output/`. This command packages
 existing builds; it does not rebuild SDL2 or change installed packages.
+
+## APT repository
+
+Signed preview packages are available at https://moio9.github.io/termux-gamepad/.
+This is a third-party repository for native Termux AArch64.
+
+From a clone of this repository:
+
+```sh
+pkg install curl gnupg
+./setup-apt-repository.sh
+pkg update
+apt-mark unhold sdl2
+pkg install termux-gamepad sdl2
+```
+
+The setup script verifies the downloaded signing key fingerprint, then adds
+an APT source with `signed-by` restricted to that key. It pins only `sdl2`
+and `termux-gamepad` from the `TermuxGamepad` release origin to priority 990,
+above the default priority of the official repositories. It does not install
+packages itself. Keep SDL2 unheld to receive updates through `pkg upgrade`
+(`pkg up`). Updates become available when new signed packages are published.
+Custom user APT pins can override this policy; inspect `apt-cache policy sdl2`
+if the expected version is not selected.
+
+Signing key fingerprint:
+
+```text
+1EB75BAC05FC0DD7DF1462F7281527CDA5BCC1A0
+```
+
+To stop using the repository, remove these three configuration files:
+
+```sh
+rm "$PREFIX/etc/apt/sources.list.d/termux-gamepad.list"
+rm "$PREFIX/etc/apt/preferences.d/termux-gamepad"
+rm "$PREFIX/etc/apt/keyrings/termux-gamepad.asc"
+pkg update
+```
+
+Removing a source does not uninstall its packages or automatically downgrade
+SDL2; restore the official SDL2 package explicitly if desired.
+
+### Publishing repository updates
+
+Build new versioned Debian packages, then run:
+
+```sh
+python3 packaging/build-apt.py --output ../termux-gamepad-apt \
+  --gnupghome /path/to/private-signing-directory --key SIGNING_FINGERPRINT
+```
+
+Commit and push that output on the `gh-pages` branch. Keep signing private keys
+and revocation certificates outside the repository and back them up privately.
+GitHub Pages serves the public key, signed metadata and Debian packages only.
