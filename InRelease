@@ -1,0 +1,27 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA256
+
+Origin: TermuxGamepad
+Label: Termux Gamepad
+Suite: preview
+Codename: preview
+Architectures: aarch64
+Date: Sat, 19 Sep 2026 18:56:38 GMT
+Description: Experimental Termux controller packages
+SHA256:
+ 52d224574ef641a66e6ade973ceea054ccffd405badbec8abeb20282999078e3 1707 Packages
+ fa2775ebc2806d0a76d30d24a13a5e8a739e34fe41dfc3acc2c3e948476f1be1 888 Packages.gz
+-----BEGIN PGP SIGNATURE-----
+
+iQHPBAEBCAA5FiEEHrdbrAX8DdffFGL3KBUnzaW8waAFAmqu2uYbFIAAAAAABAAO
+bWFudTIsMi41KzEuMTIsMywyAAoJECgVJ82lvMGgDL4MAKOuLjeHYiFYkwYHexj3
+j2qTPpS7kTZrV65sT7Ti7RaKE4zcUB51ImgL92nURw54rQcpmklGA3Vq/eWibcVZ
+UFmuzIaZvtTyET+WMWdYfL8uiBvlH9hQhlJXpX9iD8W0ZU0qV4D+Q9i6lcV3n2eu
+CvJp4ZxKhP0fe/Y3sPosQC4KpIeNocEmzjnDUczLAD02crmJBzVUr2bgBvd1EcQg
+rRQfQKvBCJhmKIIu9rRQwr9tZSJqwSBRqyUlNhUeFbB/XIxd9xeyS9lGyufCgPpK
+/nSa0t0S8KYqwHqR1ukrm3bwB0xRN5lHUDH0uyFyd1k4KPi8bxDsOrH/7qaX+/zV
+kB6m/PEjMwpYoxxMGm2rXFi7IruGsDvPtFuXOb5H3IiTMsmk68/T2NHNFeY2VrBv
+0wIrVfCw0UsEtfCh89oLEtUBxz7kaRJ8T5N+nSiYdN8MT3aG8ORBhnfgudbvd7sQ
+Ixc2IL/QqKTKw5kAJjNj+KFrp4JUJ8db4F475jTcK7sdJQ==
+=Lncv
+-----END PGP SIGNATURE-----

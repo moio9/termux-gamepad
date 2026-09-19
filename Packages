@@ -1,0 +1,35 @@
+Package: sdl2
+Architecture: aarch64
+Version: 2.32.10+termuxgamepad4
+Maintainer: moio9 (based on the Termux sdl2 package)
+Homepage: https://www.libsdl.org
+Depends: termux-gamepad (>= 0.1.0), libdecor, libiconv, libwayland, libx11, libxcursor, libxext, libxfixes, libxi, libxkbcommon, libxrandr, libxss, pulseaudio
+Conflicts: libsdl2
+Recommends: opengl
+Replaces: libsdl2
+Description: SDL2 for Termux with native Termux:X11 gamepad support
+ This build provides fake udev/evdev as the default controller route and links
+ SDL to libtermux-gamepad as a fallback when LD_PRELOAD is rejected. It
+ supports runtime XInput and DirectInput identities, hotplug, rumble, trigger
+ rumble and SDL haptic effects, with automatic duplicate suppression while
+ preserving Termux exec path translation for graphical launchers.
+Filename: pool/sdl2_2.32.10+termuxgamepad4_aarch64.deb
+Size: 863348
+SHA256: 53483362ae6dc60071a35e44371256700fe8c744bd2f01140d224976c27b2610
+
+Package: termux-gamepad
+Architecture: aarch64
+Version: 0.1.0
+Maintainer: moio9
+Homepage: https://github.com/moio9/termux-gamepad
+Depends: libx11, libxi, procps, coreutils, termux-exec
+Breaks: sdl2 (= 2.32.10+termuxgamepad1), sdl2 (= 2.32.10+termuxgamepad2), sdl2 (= 2.32.10+termuxgamepad3)
+Replaces: sdl2 (<< 2.32.10+termuxgamepad4)
+Description: Experimental Termux:X11 controller bridge and native libraries
+ Provides libtermux-gamepad, scoped udev/evdev compatibility libraries,
+ the XI2 bridge, launch tools and a shell profile for controller support.
+ Requires a matching Termux:X11 build with LORIE-CONTROLLER support.
+Filename: pool/termux-gamepad_0.1.0_aarch64.deb
+Size: 25468
+SHA256: 3d304af0ec26a76d98ceacbee7c3923268c1c3e6ab9e15971555b3532763941c
+

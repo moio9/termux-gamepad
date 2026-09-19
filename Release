@@ -1,0 +1,10 @@
+Origin: TermuxGamepad
+Label: Termux Gamepad
+Suite: preview
+Codename: preview
+Architectures: aarch64
+Date: Sat, 19 Sep 2026 18:56:38 GMT
+Description: Experimental Termux controller packages
+SHA256:
+ 52d224574ef641a66e6ade973ceea054ccffd405badbec8abeb20282999078e3 1707 Packages
+ fa2775ebc2806d0a76d30d24a13a5e8a739e34fe41dfc3acc2c3e948476f1be1 888 Packages.gz
