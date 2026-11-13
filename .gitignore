@@ -2,3 +2,5 @@
 *.log
 *.bak
 /output/
+
+/adapters/carbon-xi2/out/

@@ -217,6 +217,13 @@ With no override, the shim follows the Termux:X11 setting automatically;
 XDInput uses the Xbox-compatible evdev profile so Wine can also build WGI on
 top of it.
 
+## Experimental SDL3 multi-controller adapter
+
+A separate adapter for compatible native Carbon ports is available in
+[`adapters/carbon-xi2`](adapters/carbon-xi2/). It exposes the separate
+controllers provided by Termux:X11-Extra to the port's SDL3 runtime. This does
+not change the single-controller behavior of the evdev bridge described above.
+
 ## Current limitations
 
 - One virtual controller is exposed at a time; simultaneous physical
